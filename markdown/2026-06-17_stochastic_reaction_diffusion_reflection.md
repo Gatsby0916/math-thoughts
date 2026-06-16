@@ -1,5 +1,9 @@
 # Understanding Diffusion Through Probability Flux and Multi-Sample Paths
 
+Author: Haiyi Li
+
+Email: [Gatsbyli@h,gmail,edu](mailto:Gatsbyli@h,gmail,edu)
+
 Date: 2026-06-17
 
 Diffusion appears in molecular motion, chemical transport, cell migration, ecological spread, financial perturbations, heat flow, and contaminant transport. In these settings diffusion is more than the operator \(D\Delta\). It is a modelling language that connects microscopic random paths to macroscopic probability distributions.
