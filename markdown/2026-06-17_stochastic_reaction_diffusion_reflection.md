@@ -1,108 +1,130 @@
-# Stochastic Modelling of Reaction-Diffusion Processes: A Post-Exam Reflection
+# Understanding Diffusion Through Probability Flux and Multi-Sample Paths
 
 Date: 2026-06-17
 
-After finishing the exam, I feel that this course changed my understanding of stochastic modelling in a very concrete way. Before this course, I often treated differential equations, probability distributions, and simulation algorithms as separate tools. Now I see them as different languages for describing the same evolving system.
+Diffusion appears in molecular motion, chemical transport, cell migration, ecological spread, financial perturbations, heat flow, and contaminant transport. In these settings diffusion is more than the operator \(D\Delta\). It is a modelling language that connects microscopic random paths to macroscopic probability distributions.
 
-The central lesson is that a model is not only a formula. It is a choice about which uncertainty matters, which scale is being observed, and which mathematical object is carrying the state of the system.
+This note develops diffusion from the viewpoint of multi-sample paths, empirical measures, probability density, Fokker--Planck equations, probability flux, and expected absorption time. The full LaTeX version with numbered equations is stored in:
 
-## 1. From deterministic rates to random events
+- `latex/stochastic_diffusion/probability_flux_multisample_paths.tex`
+- `latex/stochastic_diffusion/probability_flux_multisample_paths.pdf`
 
-In a deterministic reaction model, concentration changes smoothly according to an ODE. This is powerful, but it hides the fact that reactions are discrete events. The stochastic simulation viewpoint makes this visible:
+## Main Thought
 
-- a reaction channel has a propensity;
-- the next event time is random;
-- the next reaction type is random;
-- one trajectory is only one possible history.
+A single diffusion path gives one possible microscopic history:
 
-This helped me understand why the same chemical system can have both a deterministic description and a stochastic description. The ODE is not "wrong"; it is a large-scale or averaged view. But when copy numbers are small, or when switching between states is important, the randomness is not just noise around the truth. It can become the mechanism.
+$$
+dX_t=\mu(X_t)\,dt+\sigma(X_t)\,dW_t.
+$$
 
-## 2. The chemical master equation as probability flow
+Many independent sample paths produce an empirical measure:
 
-The chemical master equation gave me a new way to think about probability distributions. A distribution is not just a static summary such as a mean or variance. It is an evolving object whose mass moves between states.
+$$
+\mu_t^N=\frac{1}{N}\sum_{m=1}^N\delta_{X_t^{(m)}}.
+$$
 
-This was an important shift for me:
+For a test function \(\varphi\),
 
-- the state variable can be a molecule count;
-- the unknown can be the whole probability distribution;
-- the mean and variance are projections of a deeper object;
-- long-time limits describe where probability mass eventually settles.
+$$
+\int_{\mathbb{R}}\varphi(x)\,d\mu_t^N(x)
+=\frac{1}{N}\sum_{m=1}^N\varphi(X_t^{(m)})
+\longrightarrow
+\mathbb{E}[\varphi(X_t)].
+$$
 
-The probability generating function was especially useful because it connects discrete probability with calculus. It turns an infinite collection of probabilities into one function, and then questions about moments or steady states become analytic questions.
+If \(X_t\) has density \(p(x,t)\), then
 
-## 3. Mean, variance, and the limits of averages
+$$
+\mathbb{E}[\varphi(X_t)]
+=\int_{\mathbb{R}}\varphi(x)p(x,t)\,dx.
+$$
 
-This course also made me more careful about means. In many applied problems, the mean trajectory can look simple while the actual distribution is broad, skewed, or even multimodal.
+Thus the stable large-sample object is not a single path but a probability density. The density evolves according to the Fokker--Planck equation:
 
-That matters because a mean can hide:
+$$
+\frac{\partial p}{\partial t}
+=-\frac{\partial}{\partial x}\big(\mu(x)p\big)
++\frac{1}{2}\frac{\partial^2}{\partial x^2}\big(\sigma^2(x)p\big).
+$$
 
-- rare but important events;
-- switching between favourable states;
-- stochastic focusing;
-- self-induced stochastic resonance;
-- the time scale of escape from a stable region.
+For Brownian diffusion,
 
-So one of my biggest takeaways is that "compute the expectation" is not always the same as "understand the system". Sometimes variance, hitting time, switching time, or full distributional shape carries the real modelling insight.
+$$
+dX_t=\sqrt{2D}\,dW_t,
+$$
 
-## 4. SDEs and diffusion as local uncertainty
+this reduces to the heat equation:
 
-The diffusion part clarified the connection between microscopic random movement and macroscopic equations. Brownian motion and stochastic differential equations describe local uncertain motion, while the Fokker-Planck equation describes how density evolves.
+$$
+\frac{\partial p}{\partial t}=D\Delta p.
+$$
 
-The same process can therefore be viewed in at least two ways:
+The probability flux form is
 
-- path view: where is this particle likely to move next?
-- density view: how does a cloud of many particles spread over time?
+$$
+\frac{\partial p}{\partial t}+\nabla\cdot J=0.
+$$
 
-This changed how I think about PDEs. A diffusion equation is not only a deterministic smoothing equation. It can be the collective shadow of many random paths.
+For pure diffusion,
 
-## 5. Boundaries are part of the model
+$$
+J=-D\nabla p.
+$$
 
-Reaction-diffusion problems made boundary conditions feel more meaningful. Reflecting, absorbing, and partially absorbing boundaries are not just technical details added after writing down an equation. They encode physical assumptions:
+This gives a direct interpretation of boundary conditions. Reflecting boundaries impose zero flux. Absorbing boundaries remove probability mass. Partially absorbing boundaries can be expressed through Robin-type conditions such as
 
-- can the particle leave the domain?
-- is the boundary reactive?
-- is absorption immediate or probabilistic?
-- what is the expected time before capture?
+$$
+-D\frac{\partial p}{\partial n}=\kappa p.
+$$
 
-Mean exit time problems made this especially clear. The geometry of the domain, the dimension, and the boundary behaviour all become part of the probability calculation.
+The expected absorption time connects diffusion paths to boundary events. If
 
-## 6. Algorithms are mathematical viewpoints
+$$
+\tau=\inf\{t:X_t\in\partial\Omega_{\mathrm{abs}}\},
+$$
 
-I also learned that simulation algorithms are not just implementation details. The naive stochastic simulation algorithm, Gillespie's algorithm, first-reaction method, next-reaction method, and multiscale methods each express a different way of organizing randomness and computational effort.
+then
 
-The practical question is not only "can this simulate the model?" but also:
+$$
+T(x)=\mathbb{E}_x[\tau]
+$$
 
-- which events are frequent or rare?
-- which time scale dominates?
-- which variables need exact stochastic treatment?
-- where is an approximation acceptable?
+satisfies the backward equation
 
-This made algorithmic efficiency feel like part of modelling, not something separate from it.
+$$
+\mathcal{L}T(x)=-1.
+$$
 
-## 7. A personal modelling principle
+For Brownian diffusion,
 
-The course leaves me with a principle I want to keep:
+$$
+D\Delta T(x)=-1.
+$$
 
-> Start by asking what object should evolve: a state, a trajectory, a distribution, a density, or a moment.
+On the interval \([0,L]\) with both endpoints absorbing,
 
-Once that is clear, the mathematical tools become much easier to place:
+$$
+DT''(x)=-1,\qquad T(0)=T(L)=0,
+$$
 
-- ODEs describe averaged deterministic state change;
-- CMEs describe probability flow over discrete states;
-- PGFs compress discrete distributions into analytic functions;
-- SDEs describe random continuous paths;
-- Fokker-Planck equations describe evolving densities;
-- backward equations answer hitting-time and switching-time questions;
-- simulation algorithms generate sample histories when closed forms are hard.
+and therefore
 
-This is why I feel the course improved my stochastic modelling ability. It connected differential equations and probability distributions into one modelling framework. More importantly, it made me more sensitive to when randomness should be averaged away and when it must be kept.
+$$
+T(x)=\frac{x(L-x)}{2D}.
+$$
 
-## Questions I want to keep thinking about
+This shows the core mathematical structure:
 
-1. How can we decide, before simulating, whether a deterministic approximation will miss the key behaviour?
-2. When is it better to study a full distribution rather than only moments?
-3. How should multiscale models choose which variables remain stochastic?
-4. Can mean switching time be used as a practical diagnostic for model stability?
-5. How do reaction-diffusion models change when spatial heterogeneity is not just background, but the main driver?
+$$
+X_t
+\quad\longleftrightarrow\quad
+\mu_t^N
+\quad\longleftrightarrow\quad
+p(x,t)
+\quad\longleftrightarrow\quad
+J(x,t)
+\quad\longleftrightarrow\quad
+T(x).
+$$
 
-These questions feel worth carrying forward into future work on stochastic processes, applied probability, mathematical biology, and simulation-based modelling.
+The path gives microscopic random motion, the empirical measure gives multi-sample statistics, the density gives probability distribution, the flux gives probability movement, and the expected absorption time gives the average time scale of a boundary event.

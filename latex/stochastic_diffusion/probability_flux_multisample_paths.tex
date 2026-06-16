@@ -1,0 +1,553 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,margin=2.6cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{bm}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65em}
+\linespread{1.08}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\emergencystretch=3em
+\numberwithin{equation}{section}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\dd}{\,\mathrm{d}}
+
+\title{\bfseries Understanding Diffusion Through Probability Flux and Multi-Sample Paths}
+\author{Math Thought Notes}
+\date{June 17, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Diffusion appears in molecular motion, chemical transport, cell migration, ecological spread, financial perturbations, heat flow, and contaminant transport. In these settings diffusion is more than the operator \(D\Delta\). It is a modelling language that connects microscopic random paths to macroscopic probability distributions. This note develops diffusion from the viewpoint of multi-sample paths, empirical measures, probability density, Fokker--Planck equations, probability flux, and expected absorption time.
+\end{abstract}
+
+\section{From One Random Path to Many Sample Paths}
+
+Consider the one-dimensional diffusion process
+\begin{equation}
+  \dd X_t=\mu(X_t)\dd t+\sigma(X_t)\dd W_t .
+  \label{eq:sde-general}
+\end{equation}
+Its Euler--Maruyama discretisation is
+\begin{equation}
+  X_{t+\Delta t}
+  =X_t+\mu(X_t)\Delta t+\sigma(X_t)\sqrt{\Delta t}\,\xi,
+  \qquad \xi\sim N(0,1).
+  \label{eq:euler-maruyama}
+\end{equation}
+The simplest Brownian diffusion is obtained by taking zero drift and constant diffusion strength:
+\begin{equation}
+  \dd X_t=\sqrt{2D}\dd W_t,
+  \qquad
+  X_{t+\Delta t}=X_t+\sqrt{2D\Delta t}\,\xi .
+  \label{eq:brownian-discrete}
+\end{equation}
+
+A single path \(t\mapsto X_t\) describes one possible microscopic history. The object that becomes stable in applications is usually not a single path but the collective behaviour of many independent paths. Let
+\begin{equation}
+  X_t^{(1)},X_t^{(2)},\ldots,X_t^{(N)}
+  \label{eq:sample-paths}
+\end{equation}
+be \(N\) independent copies of the diffusion in \eqref{eq:sde-general}. Their empirical measure at time \(t\) is
+\begin{equation}
+  \mu_t^N
+  =\frac{1}{N}\sum_{m=1}^{N}\delta_{X_t^{(m)}} .
+  \label{eq:empirical-measure}
+\end{equation}
+For any smooth test function \(\varphi\), the empirical measure gives
+\begin{equation}
+  \int_{\R}\varphi(x)\dd\mu_t^N(x)
+  =\frac{1}{N}\sum_{m=1}^{N}\varphi(X_t^{(m)}).
+  \label{eq:empirical-test}
+\end{equation}
+By the law of large numbers,
+\begin{equation}
+  \frac{1}{N}\sum_{m=1}^{N}\varphi(X_t^{(m)})
+  \longrightarrow
+  \E[\varphi(X_t)]
+  \qquad \text{as } N\to\infty .
+  \label{eq:law-large-numbers}
+\end{equation}
+If \(X_t\) has density \(p(x,t)\), then
+\begin{equation}
+  \E[\varphi(X_t)]
+  =\int_{\R}\varphi(x)p(x,t)\dd x .
+  \label{eq:density-weak-form}
+\end{equation}
+Thus the large-sample limit of many paths is naturally a probability density.
+
+The same idea appears in a histogram. If the interval \([x_i,x_i+h)\) contains
+\begin{equation}
+  H_i(t)=\#\{m:X_t^{(m)}\in[x_i,x_i+h)\}
+  \label{eq:hist-count}
+\end{equation}
+sample particles, then
+\begin{equation}
+  \frac{H_i(t)}{Nh}\approx p(x_i,t).
+  \label{eq:hist-density}
+\end{equation}
+The density \(p(x,t)\) can therefore be interpreted as the statistical shape of many sample paths at a fixed time. Diffusion at the macroscopic level is the collective structure produced by microscopic random paths.
+
+\section{Generator and the Fokker--Planck Equation}
+
+The infinitesimal generator of \eqref{eq:sde-general} is
+\begin{equation}
+  \mathcal{L}\varphi(x)
+  =\mu(x)\varphi'(x)
+  +\frac{1}{2}\sigma^2(x)\varphi''(x).
+  \label{eq:generator}
+\end{equation}
+Ito's formula gives
+\begin{equation}
+  \dd\varphi(X_t)
+  =\mathcal{L}\varphi(X_t)\dd t
+  +\sigma(X_t)\varphi'(X_t)\dd W_t.
+  \label{eq:ito}
+\end{equation}
+After taking expectation, the martingale term vanishes:
+\begin{equation}
+  \frac{\dd}{\dd t}\E[\varphi(X_t)]
+  =\E[\mathcal{L}\varphi(X_t)].
+  \label{eq:expect-generator}
+\end{equation}
+Using the density \(p(x,t)\), equation \eqref{eq:expect-generator} becomes
+\begin{equation}
+  \frac{\dd}{\dd t}\int_{\R}\varphi(x)p(x,t)\dd x
+  =
+  \int_{\R}\mathcal{L}\varphi(x)p(x,t)\dd x.
+  \label{eq:weak-forward}
+\end{equation}
+Integration by parts transfers derivatives from \(\varphi\) to \(p\):
+\begin{equation}
+  \int_{\R}\mathcal{L}\varphi(x)p(x,t)\dd x
+  =
+  \int_{\R}\varphi(x)\mathcal{L}^*p(x,t)\dd x,
+  \label{eq:adjoint-definition}
+\end{equation}
+where
+\begin{equation}
+  \mathcal{L}^*p
+  =
+  -\frac{\partial}{\partial x}\bigl(\mu(x)p\bigr)
+  +\frac{1}{2}\frac{\partial^2}{\partial x^2}
+  \bigl(\sigma^2(x)p\bigr).
+  \label{eq:adjoint}
+\end{equation}
+Since \(\varphi\) is arbitrary, the density satisfies the Fokker--Planck equation
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  =
+  -\frac{\partial}{\partial x}\bigl(\mu(x)p\bigr)
+  +\frac{1}{2}\frac{\partial^2}{\partial x^2}
+  \bigl(\sigma^2(x)p\bigr).
+  \label{eq:fokker-planck}
+\end{equation}
+This derivation shows that the Fokker--Planck equation is the distribution-level representation of the SDE. The SDE describes sample paths, while \eqref{eq:fokker-planck} describes the statistical limit of many sample paths.
+
+For Brownian diffusion,
+\begin{equation}
+  \mu(x)=0,
+  \qquad
+  \sigma^2(x)=2D.
+  \label{eq:brownian-coefficients}
+\end{equation}
+Then \eqref{eq:fokker-planck} reduces to
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  =D\frac{\partial^2p}{\partial x^2}.
+  \label{eq:heat-1d}
+\end{equation}
+In multiple dimensions this becomes
+\begin{equation}
+  \frac{\partial p}{\partial t}=D\Delta p.
+  \label{eq:heat-nd}
+\end{equation}
+The heat equation is therefore also the probability-density equation of Brownian motion.
+
+\section{Fundamental Solution and the Spread of a Sample Cloud}
+
+If all particles start at the origin,
+\begin{equation}
+  X_0=0,
+  \label{eq:origin-initial}
+\end{equation}
+then Brownian diffusion satisfies
+\begin{equation}
+  X_t=\sqrt{2D}W_t.
+  \label{eq:brownian-solution}
+\end{equation}
+Consequently,
+\begin{equation}
+  X_t\sim N(0,2Dt),
+  \label{eq:brownian-distribution}
+\end{equation}
+and the density is
+\begin{equation}
+  p(x,t)
+  =
+  \frac{1}{\sqrt{4\pi Dt}}
+  \exp\left(-\frac{x^2}{4Dt}\right).
+  \label{eq:gaussian-kernel}
+\end{equation}
+This Gaussian kernel is the fundamental solution of
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  =D\frac{\partial^2p}{\partial x^2}
+  \label{eq:heat-fundamental}
+\end{equation}
+with initial condition
+\begin{equation}
+  p(x,0)=\delta_0(x).
+  \label{eq:delta-initial}
+\end{equation}
+Its moments are
+\begin{equation}
+  \E[X_t]=0,
+  \qquad
+  \operatorname{Var}(X_t)=2Dt.
+  \label{eq:brownian-moments}
+\end{equation}
+Thus a cloud of particles released from a single point keeps its centre at the origin while its width grows like
+\begin{equation}
+  \sqrt{\operatorname{Var}(X_t)}
+  =\sqrt{2Dt}.
+  \label{eq:diffusive-scale}
+\end{equation}
+Diffusion is not primarily the movement of the mean position; it is the spreading of a distribution. This interpretation is useful for molecular diffusion, contaminant transport, cell population migration, heat diffusion, and random perturbation propagation.
+
+For a general initial density \(p_0(x)\), the solution is the convolution
+\begin{equation}
+  p(x,t)
+  =
+  \int_{\R}
+  \frac{1}{\sqrt{4\pi Dt}}
+  \exp\left(-\frac{(x-y)^2}{4Dt}\right)
+  p_0(y)\dd y.
+  \label{eq:heat-convolution}
+\end{equation}
+This formula expresses diffusion as Gaussian smoothing of the initial distribution.
+
+\section{Probability Flux and Conservation Form}
+
+The Fokker--Planck equation can be written as a conservation law:
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  +\frac{\partial J}{\partial x}=0.
+  \label{eq:conservation-form}
+\end{equation}
+For the one-dimensional diffusion \eqref{eq:sde-general}, the flux is
+\begin{equation}
+  J(x,t)
+  =
+  \mu(x)p(x,t)
+  -\frac{1}{2}\frac{\partial}{\partial x}
+  \bigl(\sigma^2(x)p(x,t)\bigr).
+  \label{eq:general-flux}
+\end{equation}
+For pure diffusion,
+\begin{equation}
+  J=-D\frac{\partial p}{\partial x}.
+  \label{eq:ficks-law}
+\end{equation}
+This is Fick's law: probability mass flows from regions of high density to regions of low density.
+
+With constant drift \(v\),
+\begin{equation}
+  \dd X_t=v\dd t+\sqrt{2D}\dd W_t,
+  \label{eq:constant-drift-sde}
+\end{equation}
+the density satisfies
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  =
+  -v\frac{\partial p}{\partial x}
+  +D\frac{\partial^2p}{\partial x^2},
+  \label{eq:advection-diffusion-1d}
+\end{equation}
+with flux
+\begin{equation}
+  J=vp-D\frac{\partial p}{\partial x}.
+  \label{eq:advection-diffusion-flux}
+\end{equation}
+The term \(vp\) is advection flux, while \(-D\partial_xp\) is diffusion flux. This form appears naturally in contaminant transport in a flow, cell movement under directional bias, and particles transported by an external velocity field.
+
+On an interval \([a,b]\), the total probability mass is
+\begin{equation}
+  M(t)=\int_a^b p(x,t)\dd x.
+  \label{eq:interval-mass}
+\end{equation}
+Integrating \eqref{eq:conservation-form} gives
+\begin{equation}
+  \frac{\dd M}{\dd t}=J(a,t)-J(b,t).
+  \label{eq:mass-balance-interval}
+\end{equation}
+The change of probability mass inside a region is determined entirely by the flux through its boundary.
+
+\section{Reflecting, Absorbing, and Partially Absorbing Boundaries}
+
+Boundary conditions have direct probabilistic meanings. A reflecting boundary has no probability flux through it. On \([0,L]\), reflecting boundaries are written as
+\begin{equation}
+  J(0,t)=J(L,t)=0.
+  \label{eq:reflecting-flux}
+\end{equation}
+For pure diffusion this is equivalent to the Neumann condition
+\begin{equation}
+  \frac{\partial p}{\partial x}(0,t)=0,
+  \qquad
+  \frac{\partial p}{\partial x}(L,t)=0.
+  \label{eq:reflecting-neumann}
+\end{equation}
+Therefore
+\begin{equation}
+  \frac{\dd}{\dd t}\int_0^L p(x,t)\dd x=0.
+  \label{eq:reflecting-mass}
+\end{equation}
+Total probability is conserved. Reflecting boundaries model impermeable walls, closed containers, or symmetry surfaces with zero net flux.
+
+At an absorbing boundary, a particle leaves the system after reaching the boundary. A typical absorbing condition is
+\begin{equation}
+  p(x,t)=0,
+  \qquad x\in\partial\Omega_{\mathrm{abs}}.
+  \label{eq:absorbing-boundary}
+\end{equation}
+Then
+\begin{equation}
+  \frac{\dd}{\dd t}\int_{\Omega}p(x,t)\dd x\le 0.
+  \label{eq:absorbing-mass-decay}
+\end{equation}
+Let
+\begin{equation}
+  \tau=\inf\{t:X_t\in\partial\Omega_{\mathrm{abs}}\}.
+  \label{eq:hitting-time}
+\end{equation}
+The probability mass remaining inside \(\Omega\) is the survival probability:
+\begin{equation}
+  \Prob(\tau>t)=\int_{\Omega}p(x,t)\dd x.
+  \label{eq:survival-probability}
+\end{equation}
+The lost mass is
+\begin{equation}
+  1-\int_{\Omega}p(x,t)\dd x=\Prob(\tau\le t).
+  \label{eq:absorbed-probability}
+\end{equation}
+Thus an absorbing-boundary density is naturally a sub-probability density.
+
+A partially absorbing boundary lies between reflection and absorption. A common Robin condition is
+\begin{equation}
+  -D\frac{\partial p}{\partial n}
+  =\kappa p,
+  \qquad x\in\partial\Omega,
+  \label{eq:robin-boundary}
+\end{equation}
+where \(\kappa\ge0\) is the boundary absorption strength. The case \(\kappa=0\) gives reflection; the limit \(\kappa\to\infty\) approaches full absorption. Such boundary conditions occur in surface reactions, receptor binding, membrane absorption, and catalytic interfaces.
+
+\section{Expected Absorption Time}
+
+For absorption problems, an important quantity is the expected absorption time
+\begin{equation}
+  T(x)=\E_x[\tau],
+  \label{eq:mean-absorption-time}
+\end{equation}
+where the process starts at \(X_0=x\). For generator \(\mathcal{L}\), the mean absorption time satisfies the backward equation
+\begin{equation}
+  \mathcal{L}T(x)=-1,
+  \qquad x\in\Omega,
+  \label{eq:backward-mean-time}
+\end{equation}
+with absorbing boundary condition
+\begin{equation}
+  T(x)=0,
+  \qquad x\in\partial\Omega_{\mathrm{abs}}.
+  \label{eq:mean-time-absorbing-bc}
+\end{equation}
+If part of the boundary is reflecting, then
+\begin{equation}
+  \frac{\partial T}{\partial n}=0,
+  \qquad x\in\partial\Omega_{\mathrm{ref}}.
+  \label{eq:mean-time-reflecting-bc}
+\end{equation}
+For Brownian diffusion,
+\begin{equation}
+  \mathcal{L}=D\Delta,
+  \label{eq:brownian-generator}
+\end{equation}
+so
+\begin{equation}
+  D\Delta T(x)=-1.
+  \label{eq:brownian-mean-time}
+\end{equation}
+
+On the interval \([0,L]\) with both endpoints absorbing,
+\begin{equation}
+  DT''(x)=-1,
+  \qquad
+  T(0)=T(L)=0.
+  \label{eq:two-absorbing-bvp}
+\end{equation}
+Integrating twice gives
+\begin{align}
+  T''(x)&=-\frac{1}{D}, \label{eq:two-absorbing-step1}\\
+  T'(x)&=-\frac{x}{D}+C_1, \label{eq:two-absorbing-step2}\\
+  T(x)&=-\frac{x^2}{2D}+C_1x+C_2. \label{eq:two-absorbing-step3}
+\end{align}
+The condition \(T(0)=0\) gives
+\begin{equation}
+  C_2=0.
+  \label{eq:c2-zero}
+\end{equation}
+The condition \(T(L)=0\) gives
+\begin{equation}
+  -\frac{L^2}{2D}+C_1L=0,
+  \qquad
+  C_1=\frac{L}{2D}.
+  \label{eq:c1-two-absorbing}
+\end{equation}
+Therefore
+\begin{equation}
+  T(x)=\frac{x(L-x)}{2D}.
+  \label{eq:two-absorbing-solution}
+\end{equation}
+The maximum occurs at the midpoint:
+\begin{equation}
+  T\left(\frac{L}{2}\right)
+  =\frac{L^2}{8D}.
+  \label{eq:two-absorbing-midpoint}
+\end{equation}
+
+If the left endpoint is reflecting and the right endpoint is absorbing, then
+\begin{equation}
+  T'(0)=0,
+  \qquad
+  T(L)=0,
+  \qquad
+  DT''(x)=-1.
+  \label{eq:reflect-absorb-bvp}
+\end{equation}
+The first integration gives
+\begin{equation}
+  T'(x)=-\frac{x}{D}+C_1.
+  \label{eq:reflect-absorb-step1}
+\end{equation}
+Using \(T'(0)=0\) gives
+\begin{equation}
+  C_1=0.
+  \label{eq:reflect-absorb-c1}
+\end{equation}
+Using \(T(L)=0\) then gives
+\begin{equation}
+  T(x)=\frac{L^2-x^2}{2D}.
+  \label{eq:reflect-absorb-solution}
+\end{equation}
+In particular,
+\begin{equation}
+  T(0)=\frac{L^2}{2D}.
+  \label{eq:reflect-absorb-origin}
+\end{equation}
+Reflection increases the expected absorption time because the particle cannot leave through the reflecting endpoint.
+
+\section{Applied Interpretation}
+
+In molecular diffusion, \(p(x,t)\) can represent the probability density of a single molecule or, after scaling by the number of molecules, a concentration profile. If a boundary is absorbing, the same formalism describes molecules captured by a surface, bound by receptors, absorbed by a membrane, or entering a reactive region. The boundary flux gives an absorption rate.
+
+In ecology and cell migration, diffusion models random movement, while drift represents chemotaxis, environmental gradients, or external flow. The advection--diffusion equation
+\begin{equation}
+  \frac{\partial p}{\partial t}
+  =
+  -\nabla\cdot(vp)+D\Delta p
+  \label{eq:advection-diffusion-nd}
+\end{equation}
+has flux
+\begin{equation}
+  J=vp-D\nabla p.
+  \label{eq:advection-diffusion-nd-flux}
+\end{equation}
+The term \(vp\) is directed transport, while \(-D\nabla p\) is random spreading.
+
+For a reaction--diffusion model
+\begin{equation}
+  \frac{\partial u}{\partial t}=D\Delta u+f(u),
+  \label{eq:reaction-diffusion}
+\end{equation}
+the term \(D\Delta u\) represents spatial spreading and \(f(u)\) represents local growth, decay, reaction, or interaction. If \(u\) is a probability density, then
+\begin{equation}
+  \int_{\Omega}u(x,t)\dd x
+  \label{eq:total-u}
+\end{equation}
+is total probability mass. If \(u\) is a concentration, the same integral is total amount.
+
+For the linear decay model
+\begin{equation}
+  \frac{\partial u}{\partial t}=D\Delta u-ku,
+  \label{eq:diffusion-decay}
+\end{equation}
+with no-flux boundary, the total mass satisfies
+\begin{equation}
+  \frac{\dd}{\dd t}\int_{\Omega}u(x,t)\dd x
+  =
+  -k\int_{\Omega}u(x,t)\dd x.
+  \label{eq:decay-mass-balance}
+\end{equation}
+If absorption at the boundary is also present, then
+\begin{equation}
+  \frac{\dd}{\dd t}\int_{\Omega}u(x,t)\dd x
+  =
+  -\int_{\partial\Omega}J\cdot n\dd S
+  -k\int_{\Omega}u(x,t)\dd x.
+  \label{eq:boundary-reaction-mass-balance}
+\end{equation}
+This mass balance combines diffusion, boundary absorption, and reaction decay in one expression.
+
+\section{Mathematical Structure}
+
+Diffusion has three linked levels. The first is the path level:
+\begin{equation}
+  \dd X_t=\mu(X_t)\dd t+\sigma(X_t)\dd W_t.
+  \label{eq:summary-path}
+\end{equation}
+The second is the distribution level:
+\begin{equation}
+  \frac{\partial p}{\partial t}=\mathcal{L}^*p.
+  \label{eq:summary-distribution}
+\end{equation}
+The third is the event level, represented here by hitting time:
+\begin{equation}
+  T(x)=\E_x[\tau],
+  \qquad
+  \mathcal{L}T=-1.
+  \label{eq:summary-event}
+\end{equation}
+Multi-sample paths connect the path level to the distribution level. Probability flux connects density evolution to boundary behaviour. Expected absorption time connects random paths to boundary events.
+
+The objects can be placed in one framework:
+\begin{equation}
+  X_t
+  \quad\longleftrightarrow\quad
+  \mu_t^N
+  \quad\longleftrightarrow\quad
+  p(x,t)
+  \quad\longleftrightarrow\quad
+  J(x,t)
+  \quad\longleftrightarrow\quad
+  T(x).
+  \label{eq:object-chain}
+\end{equation}
+The path gives microscopic random motion, the empirical measure gives multi-sample statistics, the density gives probability distribution, the flux gives probability movement, and the expected absorption time gives the average time scale of a boundary event. Diffusion appears so widely because these objects can be connected within the same mathematical structure.
+
+\end{document}
