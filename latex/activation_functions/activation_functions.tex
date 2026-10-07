@@ -141,4 +141,118 @@ so $\tanh$ saturates even faster than $\sigma$. It fixes the sign problem and th
 \caption{$\tanh$ (solid) and its derivative (dashed). Zero-centred, peak slope $1$.}
 \end{figure}
 
+\section{Arctangent}
+
+\begin{equation}
+  \phi(z)=\arctan z, \qquad \arctan z\in\left(-\tfrac{\pi}{2},\tfrac{\pi}{2}\right), \qquad \arctan 0=0 .
+\end{equation}
+Like $\tanh$ it is odd and zero-centred, with peak slope $1$:
+\begin{equation}
+  \frac{d}{dz}\arctan z=\frac{1}{1+z^2}, \qquad \max_z=1 \text{ at } z=0 .
+\end{equation}
+The difference is in the tails. For $z>0$,
+\begin{equation}
+  \frac{\pi}{2}-\arctan z=\arctan\frac1z\approx\frac1z,
+  \qquad \frac{1}{1+z^2}\approx\frac{1}{z^2},
+\end{equation}
+so the derivative decays like a power of $z$, not exponentially. At $z=5$:
+\begin{equation}
+  \tanh'(5)\approx1.8\times10^{-4}, \qquad
+  \sigma'(5)\approx6.6\times10^{-3}, \qquad
+  \arctan'(5)=\tfrac{1}{26}\approx3.8\times10^{-2}.
+\end{equation}
+Near $0$, $\arctan$ and $\tanh$ are almost the same function:
+\begin{equation}
+  \tanh z = z-\frac{z^3}{3}+\frac{2z^5}{15}-\cdots, \qquad
+  \arctan z = z-\frac{z^3}{3}+\frac{z^5}{5}-\cdots .
+  \label{eq:taylor}
+\end{equation}
+They agree up to $z^3$. All the difference is for large $|z|$.
+To get the same range as $\tanh$ one can use $\tfrac{2}{\pi}\arctan z\in(-1,1)$, whose slope at $0$ is $\tfrac{2}{\pi}$.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=0.75cm,y=1.1cm]
+  \axes{-5.3}{5.5}{-1.85}{1.9}
+  \draw[guide] (-5,{pi/2}) -- (5,{pi/2});
+  \draw[guide] (-5,{-pi/2}) -- (5,{-pi/2});
+  \node[left] at (-5,{pi/2}) {\scriptsize $\tfrac{\pi}{2}$};
+  \node[left] at (-5,{-pi/2}) {\scriptsize $-\tfrac{\pi}{2}$};
+  \draw[ref, domain=-5:5] plot (\x, {tanh(\x)});
+  \draw[fn, domain=-5:5] plot (\x, {rad(atan(\x))});
+  \draw[dfn, domain=-5:5] plot (\x, {1/(1+\x*\x)});
+  \node[right] at (5,1.37) {$\arctan z$};
+  \node[right, gray] at (5,0.95) {\small $\tanh z$};
+  \node at (-3.4,0.45) {$1/(1+z^2)$};
+\end{tikzpicture}
+\caption{$\arctan$ (solid), its derivative (dashed) and $\tanh$ (grey). The derivative has a long tail.}
+\end{figure}
+
+\section{ReLU}
+
+\begin{equation}
+  \operatorname{ReLU}(z)=\max(0,z), \qquad \operatorname{ReLU}(z)\in[0,\infty).
+\end{equation}
+The derivative is a step:
+\begin{equation}
+  \operatorname{ReLU}'(z)=
+  \begin{cases}
+    1, & z>0,\\
+    0, & z<0,
+  \end{cases}
+\end{equation}
+and at $z=0$ any value in $[0,1]$ is a subgradient; libraries use $0$.
+
+On active units ($z_l>0$) every factor $\phi'(z_l)$ in \eqref{eq:chain} equals $1$:
+\begin{equation}
+  \frac{\partial a_L}{\partial z_1}=\prod_{l=1}^{L-1} w_{l+1}
+  \qquad\text{if all } z_l>0,
+\end{equation}
+so the activation itself causes no vanishing. Other properties:
+\begin{equation}
+  \operatorname{ReLU}(cz)=c\,\operatorname{ReLU}(z)\quad (c\ge0),
+  \qquad
+  \operatorname{ReLU}(z)=0 \ \text{for } z<0 .
+\end{equation}
+The first is positive homogeneity. The second gives sparse outputs and costs one comparison,
+but a unit with $z<0$ for every input gets zero gradient forever (a ``dead'' unit).
+Leaky ReLU keeps a small slope $\alpha$ (often $0.01$) on the negative side:
+\begin{equation}
+  \operatorname{LReLU}_\alpha(z)=\max(\alpha z, z), \qquad
+  \operatorname{LReLU}_\alpha'(z)=
+  \begin{cases}
+    1, & z>0,\\
+    \alpha, & z<0.
+  \end{cases}
+\end{equation}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=0.5cm,y=0.5cm]
+  % left: functions
+  \draw[->] (-4.4,0) -- (4.6,0) node[right] {$z$};
+  \draw[->] (0,-1.4) -- (0,4.6);
+  \foreach \t in {-4,-2,2,4} \draw (\t,0.08) -- (\t,-0.08) node[below] {\scriptsize $\t$};
+  \draw[fn] (-4,0) -- (0,0) -- (4,4);
+  \draw[thick, dotted] (-4,-1) -- (0,0);
+  \node[left] at (3.2,3.9) {$\max(0,z)$};
+  \node at (-2.6,-1.2) {\scriptsize leaky};
+  % right: derivatives
+  \begin{scope}[xshift=6.5cm]
+  \draw[->] (-4.4,0) -- (4.6,0) node[right] {$z$};
+  \draw[->] (0,-1.4) -- (0,4.6);
+  \foreach \t in {-4,-2,2,4} \draw (\t,0.08) -- (\t,-0.08) node[below] {\scriptsize $\t$};
+  \draw[dfn] (-4,0) -- (0,0);
+  \draw[dfn] (0,2) -- (4,2);
+  \draw[thick, dotted] (-4,0.5) -- (0,0.5);
+  \fill[white] (0,2) circle (2.5pt); \draw (0,2) circle (2.5pt);
+  \node[left] at (0,2) {\scriptsize $1$};
+  \node[left] at (0,0.5) {\scriptsize $\alpha$};
+  \node at (2.2,2.6) {$\operatorname{ReLU}'(z)$};
+  \node at (-2.4,1.0) {\scriptsize leaky};
+  \end{scope}
+\end{tikzpicture}
+\caption{Left: ReLU (solid) and leaky ReLU (dotted). Right: their derivatives. $\alpha=0.25$ here for visibility.}
+\end{figure}
+
 \end{document}
