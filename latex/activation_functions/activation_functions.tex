@@ -255,4 +255,69 @@ Leaky ReLU keeps a small slope $\alpha$ (often $0.01$) on the negative side:
 \caption{Left: ReLU (solid) and leaky ReLU (dotted). Right: their derivatives. $\alpha=0.25$ here for visibility.}
 \end{figure}
 
+\section{Softmax}
+
+Softmax acts on a whole vector $z\in\mathbb{R}^K$, not on one number:
+\begin{equation}
+  s_i(z)=\frac{e^{z_i}}{\sum_{j=1}^{K}e^{z_j}}, \qquad i=1,\dots,K .
+\end{equation}
+The output is a probability vector:
+\begin{equation}
+  s_i>0, \qquad \sum_{i=1}^K s_i=1 .
+\end{equation}
+Adding the same constant to every entry changes nothing:
+\begin{equation}
+  s(z+c\mathbf{1})=s(z),
+\end{equation}
+so in practice one computes $s(z-\max_j z_j)$ to avoid overflow in $e^{z_i}$.
+
+The Jacobian couples all entries:
+\begin{equation}
+  \frac{\partial s_i}{\partial z_j}=s_i(\delta_{ij}-s_j),
+  \qquad
+  J=\operatorname{diag}(s)-s\,s^\top .
+\end{equation}
+With $K=2$ softmax is the sigmoid of the difference:
+\begin{equation}
+  s_1=\frac{e^{z_1}}{e^{z_1}+e^{z_2}}=\frac{1}{1+e^{-(z_1-z_2)}}=\sigma(z_1-z_2).
+  \label{eq:softmax-sigmoid}
+\end{equation}
+With the cross-entropy loss $\ell=-\sum_i y_i\log s_i$ and a one-hot label $y$, the gradient is simply
+\begin{equation}
+  \frac{\partial\ell}{\partial z_j}
+  =-\sum_i y_i(\delta_{ij}-s_j)
+  =s_j-y_j ,
+  \qquad
+  \nabla_z\ell=s-y .
+\end{equation}
+A temperature $T>0$ controls how sharp the output is:
+\begin{equation}
+  s(z/T)\ \longrightarrow\
+  \begin{cases}
+    \text{one-hot at } \arg\max_i z_i, & T\to0,\\
+    \left(\tfrac1K,\dots,\tfrac1K\right), & T\to\infty .
+  \end{cases}
+\end{equation}
+Because the units are coupled, softmax is used at the output layer for classification,
+not as a hidden-layer activation.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[x=0.75cm,y=2.6cm]
+  \draw[->] (-5.3,0) -- (5.5,0) node[right] {$t$};
+  \draw[->] (0,-0.1) -- (0,1.2);
+  \foreach \t in {-4,-2,2,4} \draw (\t,0.015) -- (\t,-0.015) node[below] {\scriptsize $\t$};
+  \draw[guide] (-5,1) -- (5,1);
+  \node[left] at (0,1) {\scriptsize $1$};
+  \draw[fn, domain=-5:5] plot (\x, {exp(\x)/(exp(\x)+1+exp(1))});
+  \draw[dfn, domain=-5:5] plot (\x, {1/(exp(\x)+1+exp(1))});
+  \draw[thick, dotted, smooth, samples=161, domain=-5:5] plot (\x, {exp(1)/(exp(\x)+1+exp(1))});
+  \node[right] at (5,0.97) {$s_1$};
+  \node at (-3.6,0.84) {$s_3$};
+  \node at (-3.6,0.36) {$s_2$};
+  \node at (-3.6,0.08) {$s_1$};
+\end{tikzpicture}
+\caption{Softmax of $z=(t,0,1)$ as $t$ varies: $s_1$ (solid), $s_2$ (dashed), $s_3$ (dotted). The three curves always add up to $1$.}
+\end{figure}
+
 \end{document}
