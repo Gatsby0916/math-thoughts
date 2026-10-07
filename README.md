@@ -18,14 +18,19 @@ Not a museum of perfect results, but a workshop for growing ideas 🧠
 - project materials and experiments
 
 
+## Write-ups
+
+| Topic | Note | Source |
+|---|---|---|
+| Functional analysis | From a Single Jump to a Point Mass: A Story of Heaviside and Dirac | [PDF](docs/functional_analysis/dirac_heaviside_measure_story.pdf) · [LaTeX](latex/functional_analysis/dirac_heaviside_measure_story.tex) |
+| Stochastic processes | Understanding Diffusion Through Probability Flux and Multi-Sample Paths | [PDF](latex/stochastic_diffusion/probability_flux_multisample_paths.pdf) · [LaTeX](latex/stochastic_diffusion/probability_flux_multisample_paths.tex) · [Markdown](markdown/2026-06-17_stochastic_reaction_diffusion_reflection.md) |
+
 ## Folder map
 
-- `docs/` - documents, PDFs, reports
-- `latex/` - LaTeX sources (real analysis, complex analysis, functional analysis, etc.)
+- `docs/` - compiled PDFs
+- `latex/` - LaTeX sources, one folder per topic
 - `markdown/` - topic notes in Markdown
-- `images/` - figures and diagrams
-- `projects/` - modeling work and other projects
 - `notes/` - daily raw thoughts and idea fragments
-- `resources/` - references and useful links
+- `resources/` - book notes and references
 
 Please feel free to discuss with me and share your ideas!
