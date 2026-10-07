@@ -2,7 +2,7 @@
 
 Author: Haiyi Li
 
-Email: [Gatsbyli@h,gmail,edu](mailto:Gatsbyli@h,gmail,edu)
+Email: [gatsbyli@g.harvard.edu](mailto:gatsbyli@g.harvard.edu)
 
 Date: 2026-06-17
 
@@ -11,7 +11,7 @@ Diffusion appears in molecular motion, chemical transport, cell migration, ecolo
 This note develops diffusion from the viewpoint of multi-sample paths, empirical measures, probability density, Fokker--Planck equations, probability flux, and expected absorption time. The full LaTeX version with numbered equations is stored in:
 
 - `latex/stochastic_diffusion/probability_flux_multisample_paths.tex`
-- `latex/stochastic_diffusion/probability_flux_multisample_paths.pdf`
+- `docs/stochastic_diffusion/probability_flux_multisample_paths.pdf`
 
 ## Main Thought
 
