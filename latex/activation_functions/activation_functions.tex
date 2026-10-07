@@ -5,6 +5,7 @@
 \usepackage{tikz}
 \usepackage{booktabs}
 \usepackage{caption}
+\usepackage{float}
 \geometry{a4paper,margin=1in}
 \setcounter{secnumdepth}{0}
 
@@ -86,7 +87,7 @@ Second, $\sigma(z)>0$ always. For a unit with inputs $a_j=\sigma(z_j)$ and error
 \end{equation}
 so all $\partial\ell/\partial w_j$ share the sign of $\delta$ and the weights move in a zig-zag.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=0.75cm,y=2.6cm]
   \axes{-5.3}{5.5}{-0.1}{1.2}
@@ -125,7 +126,7 @@ four times the peak of $\sigma'$. For large $|z|$,
 \end{equation}
 so $\tanh$ saturates even faster than $\sigma$. It fixes the sign problem and the small peak, but not saturation.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=0.75cm,y=1.5cm]
   \axes{-5.3}{5.5}{-1.25}{1.3}
@@ -170,7 +171,7 @@ Near $0$, $\arctan$ and $\tanh$ are almost the same function:
 They agree up to $z^3$. All the difference is for large $|z|$.
 To get the same range as $\tanh$ one can use $\tfrac{2}{\pi}\arctan z\in(-1,1)$, whose slope at $0$ is $\tfrac{2}{\pi}$.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=0.75cm,y=1.1cm]
   \axes{-5.3}{5.5}{-1.85}{1.9}
@@ -226,7 +227,7 @@ Leaky ReLU keeps a small slope $\alpha$ (often $0.01$) on the negative side:
   \end{cases}
 \end{equation}
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=0.5cm,y=0.5cm]
   % left: functions
@@ -301,7 +302,7 @@ A temperature $T>0$ controls how sharp the output is:
 Because the units are coupled, softmax is used at the output layer for classification,
 not as a hidden-layer activation.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[x=0.75cm,y=2.6cm]
   \draw[->] (-5.3,0) -- (5.5,0) node[right] {$t$};
@@ -319,5 +320,86 @@ not as a hidden-layer activation.
 \end{tikzpicture}
 \caption{Softmax of $z=(t,0,1)$ as $t$ varies: $s_1$ (solid), $s_2$ (dashed), $s_3$ (dotted). The three curves always add up to $1$.}
 \end{figure}
+
+\section{Comparison}
+
+The four scalar functions on one plot, then their derivatives.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.75cm,y=1.1cm]
+  \axes{-5.3}{5.5}{-1.85}{2.4}
+  \draw[guide] (-5,1) -- (5,1);
+  \draw[guide] (-5,-1) -- (5,-1);
+  \draw[thick, blue, smooth, samples=161, domain=-5:5] plot (\x, {1/(1+exp(-\x))});
+  \draw[thick, red, smooth, samples=161, domain=-5:5] plot (\x, {tanh(\x)});
+  \draw[thick, green!50!black, smooth, samples=161, domain=-5:5] plot (\x, {rad(atan(\x))});
+  \draw[thick] (-5,0) -- (0,0) -- (2.2,2.2);
+  \node[blue] at (-4,0.22) {\small $\sigma$};
+  \node[left, red] at (-5,-0.9) {\small $\tanh$};
+  \node[left, green!50!black] at (-5,-1.4) {\small $\arctan$};
+  \node[right] at (2.2,2.2) {\small ReLU};
+\end{tikzpicture}
+\caption{$\sigma$ (blue), $\tanh$ (red), $\arctan$ (green), ReLU (black).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.75cm,y=2.6cm]
+  \axes{-5.3}{5.5}{-0.1}{1.25}
+  \draw[guide] (-5,0.25) -- (5,0.25);
+  \node[left] at (-5,0.25) {\scriptsize $\tfrac14$};
+  \draw[guide] (-5,1) -- (5,1);
+  \node[left] at (-5,1) {\scriptsize $1$};
+  \draw[thick, blue, smooth, samples=161, domain=-5:5] plot (\x, {(1/(1+exp(-\x)))*(1-1/(1+exp(-\x)))});
+  \draw[thick, red, smooth, samples=161, domain=-5:5] plot (\x, {1-tanh(\x)*tanh(\x)});
+  \draw[thick, green!50!black, smooth, samples=161, domain=-5:5] plot (\x, {1/(1+\x*\x)});
+  \draw[thick] (-5,0.01) -- (0,0.01);
+  \draw[thick] (0,1) -- (5,1);
+  \node[right] at (5,1) {\small ReLU$'$};
+  \node[green!50!black] at (3.4,0.2) {\small $\arctan'$};
+  \node[blue] at (0.55,0.33) {\small $\sigma'$};
+  \node[red] at (-1.25,0.75) {\small $\tanh'$};
+\end{tikzpicture}
+\caption{Derivatives. Peaks: $\tfrac14$ for $\sigma$, $1$ for the others. Only $\arctan'$ keeps a visible tail at $|z|=5$.}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & range & $\phi(0)$ & $\phi'(0)$ & zero-centred & $\phi'(z)$ for large $|z|$ \\
+\midrule
+$\sigma$ & $(0,1)$ & $\tfrac12$ & $\tfrac14$ & no & $\approx e^{-|z|}$ \\
+$\tanh$ & $(-1,1)$ & $0$ & $1$ & yes & $\approx 4e^{-2|z|}$ \\
+$\arctan$ & $(-\tfrac{\pi}{2},\tfrac{\pi}{2})$ & $0$ & $1$ & yes & $\approx z^{-2}$ \\
+ReLU & $[0,\infty)$ & $0$ & -- & no & $1$ ($z>0$), $0$ ($z<0$) \\
+softmax & simplex & $\tfrac1K\mathbf 1$ & $\operatorname{diag}(s)-ss^\top$ & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Summary.}
+\end{table}
+
+How the functions are related:
+\begin{align}
+  \tanh z &= 2\sigma(2z)-1, &&\text{see \eqref{eq:tanh-sigmoid}},\\
+  \sigma(z_1-z_2) &= \operatorname{softmax}(z_1,z_2)_1, &&\text{see \eqref{eq:softmax-sigmoid}},\\
+  \tanh z-\arctan z &= -\tfrac{z^5}{15}+O(z^7), &&\text{from \eqref{eq:taylor}}.
+\end{align}
+Ordering by how fast the gradient dies for large $|z|$:
+\begin{equation}
+  \underbrace{4e^{-2|z|}}_{\tanh'}\ \ll\ \underbrace{e^{-|z|}}_{\sigma'}\ \ll\ \underbrace{z^{-2}}_{\arctan'},
+  \qquad \operatorname{ReLU}'=1 \ \text{for } z>0 .
+\end{equation}
+
+In short:
+\begin{itemize}
+  \item hidden layers: ReLU (or leaky ReLU) by default; no saturation for $z>0$, cheap;
+  \item $\tanh$: when a bounded, zero-centred output is needed, e.g.\ recurrent states;
+  \item $\sigma$: gates and binary outputs, where a value in $(0,1)$ is wanted;
+  \item $\arctan$: same shape as $\tanh$ near $0$ with a slower-decaying gradient, rarely used in practice;
+  \item softmax: output layer for $K$-class classification, paired with cross-entropy so that $\nabla_z\ell=s-y$.
+\end{itemize}
 
 \end{document}
