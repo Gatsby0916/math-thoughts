@@ -26,6 +26,9 @@ Not a museum of perfect results, but a workshop for growing ideas 🧠
 | Stochastic processes | Understanding Diffusion Through Probability Flux and Multi-Sample Paths | [PDF](docs/stochastic_diffusion/probability_flux_multisample_paths.pdf) · [LaTeX](latex/stochastic_diffusion/probability_flux_multisample_paths.tex) · [Markdown](markdown/2026-06-17_stochastic_reaction_diffusion_reflection.md) |
 | Complex analysis | A Variational Path to Laplace's Equation via Complex Analysis | [Markdown](markdown/2026-10-07_variational_path_to_laplace.md) |
 | Machine learning | Activation Functions: Sigmoid, tanh, arctan, ReLU and Softmax | [PDF](docs/activation_functions/activation_functions.pdf) · [LaTeX](latex/activation_functions/activation_functions.tex) |
+| Computer vision and variational calculus | From Four Lights to One Surface | [PDF](docs/photometric_stereo/frankot_chellappa.pdf) · [LaTeX](latex/photometric_stereo/frankot_chellappa.tex) · [Figure script](latex/photometric_stereo/reconstruct.py) |
+
+The monkey-head photographs and the figures derived from them are credited to the University of Strathclyde dataset by Emma Le Francois and colleagues, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The note crops and annotates the lighting images and computes new normal, slope and height maps. [Dataset and attribution](https://doi.org/10.15129/44b337ab-9fd9-4983-9079-a0dcfaae1d84)
 
 ## How I add ideas
 
