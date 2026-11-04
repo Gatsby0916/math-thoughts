@@ -32,23 +32,21 @@ Cropped image data from Emma Le Francois, University of Strathclyde
 \cite{data}, used under \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.
 \end{center}
 
-\section{What can four pictures tell me about one surface?}
+\section{One cheek in four lights}
 
-I start by looking at the same point on the monkey's cheek in all four
-pictures. The camera stayed still, so the point did too. Its brightness
-changed when the lighting changed. From one dark pixel alone I could propose
-dark paint, a cheek that slopes away from the light, or a shadow cast by the
-brow. Across the four pictures the paint stays the same. It is the variation
-in brightness with light direction that carries information about the slope.
+The bright rim on the left ear almost disappears by the fourth picture.
+Follow the gold ring instead. It stays on the same patch of cheek, whose
+four grey levels read $52,105,72,28$. The cheek looks darker under the last
+lamp than under the second. Its paint has stayed the same. Those two
+observations tell us something about the direction the cheek faces.
 
-Why should brightness tell me an angle? A small patch with area
-$\dd A$ and unit normal $\mathbf n$ presents the projected area
-$(\mathbf n\cdot\boldsymbol\ell_j)\,\dd A$ to a beam arriving from unit
-direction $\boldsymbol\ell_j$, measured from the patch toward the light.
-A patch facing the beam intercepts the most light. At grazing incidence
-the projected area is zero. For a matte, diffusely reflecting surface, the
-Lambertian model converts this geometric factor into measured intensity
-\cite{woodham}
+A postage stamp held square to a beam intercepts light over its whole area.
+Tilt it through $60^\circ$ and the area that the beam sees is cut in half.
+For a patch of area $\dd A$, the fraction is
+$\cos\theta_j=\mathbf n\cdot\boldsymbol\ell_j$, where $\mathbf n$ is its
+unit normal and $\boldsymbol\ell_j$ points towards lamp $j$. Once the
+patch turns past grazing incidence, the beam only reaches its back.
+For a matte surface the Lambertian law gives \cite{woodham}
 \begin{equation}
  I_j = a_j\,\rho\,v_j\,\max(0,\boldsymbol\ell_j\cdot\mathbf n).
  \label{eq:lambert}
@@ -59,12 +57,11 @@ The visibility $v_j$ is zero when another part of the object blocks that
 light and one when the beam reaches the patch. The formula assumes
 background-subtracted linear intensities.
 
-The target is the visible surface, described by one height per image
-location. First I fit a normal at each
-pixel from the changing brightness, using the known lamp geometry
-\cite{setup}. Then I ask whether these local tilts fit together into one
-surface. That second question takes me back to my earlier work on when
-a line integral gives the same answer along two different paths \cite{Li}.
+It was the step after estimating the normals that I recognised. I had once
+written a note about integrating $B\,\dd x+A\,\dd y$ along two different
+paths \cite{Li}. On this little head the endpoints might be an ear and the
+tip of the nose. The height difference between them ought to be the same
+whichever way I walk.
 
 \newpage
 \section{Solving for the normal at one pixel}
@@ -115,8 +112,8 @@ exported grayscale levels as proportional to intensity. This is an
 approximation. A common rescaling changes the scale of the fitted albedo,
 while different gains for different lights can also change the normal.
 
-Here is an actual pixel, at zero-based row 95 and column 160 of the
-$219\times389$ image rectangle. Its four 8-bit display values are
+The gold ring is at row 95, column 160 in the $219\times389$ image
+(indices start at zero). Its four 8-bit display values are
 $\mathbf b=(52,105,72,28)^\mathsf{T}$. Setting $a_j=1$ gives
 \begin{align}
  \widehat{\mathbf g}=L^+\mathbf b&=(-30.512,20.328,118.308)^\mathsf{T},
@@ -124,17 +121,68 @@ $\mathbf b=(52,105,72,28)^\mathsf{T}$. Setting $a_j=1$ gives
  \widehat{\mathbf n}&=(-0.2464,0.1641,0.9552)^\mathsf{T},
  & L\widehat{\mathbf g}&\simeq(56.2,96.1,80.9,23.8)^\mathsf{T}.
 \end{align}
-The entries of $L\widehat{\mathbf g}$ predict the four observations. Their
-disagreement with $\mathbf b$ is visible even at this well-lit point.
+The symmetry of the lamps gives a quick check on this fit. Lamps 1 and 4
+have the same $y$ and $z$ coordinates, so subtracting their two rows
+isolates $g_x$. Doing the same subtraction for lamps 2 and 3 gives
+\begin{equation}
+ \frac{\sqrt{2593}}{54}(28-52)\simeq-22.6,\qquad
+ \frac{\sqrt{3185}}{28}(72-105)\simeq-66.5.
+\end{equation}
+Both pairs put the normal to the left. They disagree on how far left.
+The four-light fit gives $-30.5$, closer to the first estimate because the
+outer pair has the larger horizontal separation in the lighting matrix.
 
 
 \newpage
-\section{From the normal map to two slope maps}
+\section{The normal projected onto the photograph}
+\begin{center}
+\includegraphics[width=\linewidth]{monkey_normal_arrows.png}
+
+\small Figure 2. Projected normals sampled every six pixels over the
+second lighting image. The dot in the enlarged cheek marks the pixel
+ringed in Figure 1. The reference arrow has projected length $0.5$.
+\end{center}
+
+Imagine standing a small pin perpendicular to the cheek at the gold
+ring. Seen through the camera, its tip is a little to the left and above
+its base. For a pin of unit length the two displacements are $-0.2464$
+and $+0.1641$ in the $(x,y)$ frame. The component towards the camera,
+$0.9552$, disappears in this view. The visible length is therefore
+\begin{equation}
+ \sqrt{n_x^2+n_y^2}=\sqrt{1-n_z^2}=\sin\theta\simeq0.296,\qquad
+ \theta=\arccos n_z\simeq17.2^\circ ,
+\end{equation}
+where $\theta$ is the angle to the viewing axis. A face-on patch shrinks
+the pin to a dot. A patch seen nearly edge-on shows almost its full length.
+
+Look at the same pin from the side, in a vertical slice taken along the
+steepest ascent. As the surface rises to the right, the pin leans left.
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=0.94]
+ \draw[gray!70,->] (-2.4,0) -- (2.85,0) node[below right] {\small image plane};
+ \draw[gray!70,dashed] (0,0) -- (0,1.95) node[above] {\small towards camera};
+ \draw[thick] (-1.75,-1.01) -- (2.55,1.47) node[right] {\small surface};
+ \draw[thick,blue!55!black,->] (0,0) -- (-.90,1.56)
+   node[above left] {\small normal};
+ \draw[blue!45!black,dotted] (-.90,1.56) -- (-.90,0);
+ \draw[blue!55!black,thick,->] (0,0) -- (-.90,0);
+ \draw (0,.61) arc[start angle=90,end angle=120,radius=.61];
+ \node at (-.25,.85) {$\theta$};
+\end{tikzpicture}
+\end{center}
+The direction of the projected normal is downhill. Its length is
+$\sin\theta$, whereas the rise per unit horizontal distance is
+$\tan\theta$. At the marked pixel these numbers are $0.296$ and $0.310$.
+The pin tips left and up in the photograph, so the surface climbs right
+and down.
+
+\newpage
+\section{From the normal map to two slope maps}\label{sec:slope-maps}
 \begin{center}
 \includegraphics[width=\linewidth]{monkey_maps.png}
 
-\small Figure 2. Fitted amplitude, unit normal and two signed slopes.
-White marks pixels excluded by the rule on the last page. The slope colour
+\small Figure 3. Fitted amplitude, unit normal and two signed slopes.
+White marks excluded pixels. The slope colour
 scales saturate at $\pm2$ for display. Integration uses the full retained values.
 \end{center}
 
@@ -145,8 +193,9 @@ by the cross product
   \mathbf r_x=(1,0,z_x),\qquad \mathbf r_y=(0,1,z_y),\qquad
   \mathbf r_x\times\mathbf r_y=(-z_x,-z_y,1).
 \end{equation}
-Once photometric stereo has estimated a normal $\mathbf n=(n_x,n_y,n_z)$
-at a pixel, the unknown scale of the normal cancels in the ratios
+The last component of this cross product is one. Dividing a measured
+normal $\mathbf n=(n_x,n_y,n_z)$ by its last component puts it on
+the same scale. Reading off the first two entries gives the slopes
 \begin{equation}
   p=-\frac{n_x}{n_z},\qquad q=-\frac{n_y}{n_z},\qquad n_z\ne 0.
   \label{eq:slopes}
@@ -174,20 +223,21 @@ $\gamma(t)=(x(t),y(t))$ the chain rule would then give
   \label{eq:path}
 \end{equation}
 
-Try the measured slopes $p=0$, $q=x$ on the unit square. Walk from $(0,0)$
-to $(1,1)$. Go right first, then up. Now repeat the walk in the other order.
-Equation \eqref{eq:path} gives
+For a pencil-and-paper example, lay the field $p=0$, $q=x$ on a unit
+square. Horizontal steps cost no height anywhere. A vertical step costs
+nothing on the left edge and one unit per unit distance on the right.
+The two walks from $(0,0)$ to $(1,1)$ now give different answers,
 \begin{align}
   \text{right, then up}\quad &\int_0^1 0\,\dd x+\int_0^1 1\,\dd y=1,
   \nonumber\\
   \text{up, then right}\quad &\int_0^1 0\,\dd y+\int_0^1 0\,\dd x=0.
   \label{eq:two-walks}
 \end{align}
-The endpoint is the same pixel. Choosing a different reference height shifts
-both walks equally, so it cannot explain the discrepancy of one.
+Walk the first route out and the second one back. The slope field credits
+you with one unit of climbing on a trip that ends exactly where it began.
 
 \newpage
-\section{The condition I had already met}
+\section{A loop in an old variational problem}
 
 My earlier calculation began with a path written as a graph $y=y(x)$ and
 an integrand affine in the path derivative. In the notation of that note,
@@ -203,11 +253,11 @@ stationary path. The chain rule makes the cancellation explicit.
       -\frac{\dd}{\dd x}\frac{\partial L}{\partial y'}&=B_y-A_x .
  \label{eq:old}
 \end{align}
-One stationary path gives the condition $B_y-A_x=0$ along that path. Requiring
-path independence throughout the domain gives a condition throughout the
-domain. Indeed, take two paths from $P_0$ to $P_1$ bounding a region $D$,
-with the first path followed by the reverse of the second oriented
-counterclockwise. Green's theorem gives
+The cancellation on a stationary path gives $B_y-A_x=0$ along that
+path. To test path independence across a region, join an outward walk
+$\gamma_1$ to the return walk $-\gamma_2$. If together they enclose $D$
+counterclockwise, Green's theorem says exactly how much height a round
+trip can gain.
 \begin{equation}
  \int_{\gamma_1}(B\,\dd x+A\,\dd y)-\int_{\gamma_2}(B\,\dd x+A\,\dd y)
       =\iint_D(A_x-B_y)\,\dd x\,\dd y .
@@ -217,10 +267,11 @@ For continuous derivatives, zero circulation around every small rectangle
 forces $A_x-B_y=0$ at each point. A nonzero value at one point would keep
 its sign on a sufficiently small rectangle about that point.
 
-Now set $B=p$ and $A=q$. The same quantity has the name
-$\Curl F=q_x-p_y$, where $F=(p,q)$. In \eqref{eq:two-walks} it equals one
-everywhere, so its integral over the unit square accounts for the entire
-height discrepancy. On a simply connected planar domain, a $C^1$ field
+Now set $B=p$ and $A=q$. The integrand is $\Curl F=q_x-p_y$ for
+$F=(p,q)$. In our square it is identically one. Stretch the square
+to width $a$ and height $b$ and the right edge alone contributes $ab$.
+The apparent height gain measures the area enclosed by the walk.
+On a simply connected planar domain, a $C^1$ field
 with zero curl has path-independent integrals. Fix $P_0$ and define
 \begin{equation}
  z(x,y)=z(P_0)+\int_{P_0}^{(x,y)}p\,\dd x+q\,\dd y .
@@ -239,9 +290,10 @@ $\Delta z=4$.
 \newpage
 \section{Fitting a surface when the walks disagree}
 
-This time the unknown is a function on the image. Given both measured
-slopes, choose the height whose gradient has the smallest integrated squared
-discrepancy. The factor $\tfrac12$ simplifies the variation. Write
+In the old problem I varied the path while keeping $A$ and $B$ fixed.
+Here the four lights have supplied the two slope images. I vary the
+\emph{height} of the head, penalising a surface wherever its tilt disagrees
+with either measured slope,
 \begin{equation}
  E[z]=\tfrac12\int_\Omega\big[(z_x-p)^2+(z_y-q)^2\big]\,\dd x\,\dd y
      =\tfrac12\int_\Omega|\nabla z-F|^2\,\dd x\,\dd y .
@@ -283,16 +335,18 @@ For the Fourier construction we instead identify opposite sides of a
 rectangle and fit a periodic height. Periodic variations make opposite
 boundary terms cancel for smooth periodic data.
 
-Why does \eqref{eq:poisson} contain divergence when curl detected the
-problem? Curl measures the disagreement between paths. The minimisation
-imposes $\Div(F-\nabla z)=0$ on the slope left over, which gives divergence
-on the right-hand side of the equation for the height.
+Curl appeared when we walked around a loop. Divergence appears when we
+raise a small patch by $\varepsilon\eta$ and count how much better its
+edges fit the measured slopes. At the best fit the leftover field satisfies
+$\Div(F-\nabla z)=0$.
 
 \newpage
-\section{Why does differentiation become multiplication?}
+\section{Differentiating a Fourier wave}
 
-The step I want to understand is the appearance of the frequency in place of a
-derivative. Start in one dimension with the convention
+A single wave $e^{\ii\xi t}$ keeps its frequency when differentiated.
+Its complex amplitude picks up a factor $\ii\xi$. There is a sign here
+that I like to check on paper, since the Fourier coefficient uses the
+opposite exponential. Take
 $\widehat g(\xi)=\int_{\mathbb R}g(t)e^{-\mathrm i\xi t}\,\mathrm dt$.
 Suppose $g$ is continuously differentiable, $g$ and $g'$ are integrable,
 and $g(t)\to0$ at both ends of the line. Integrating by parts gives
@@ -302,9 +356,9 @@ and $g(t)\to0$ at both ends of the line. Integrating by parts gives
      -\int_{\mathbb R}g(t)(-\mathrm i\xi)e^{-\mathrm i\xi t}\,\mathrm dt
   =\mathrm i\xi\,\widehat g(\xi).
 \end{equation}
-The boundary term vanishes by decay. The two minus signs have different
-origins. One comes from integration by parts and the other from differentiating
-the exponential in the transform. Their product accounts for the positive sign.
+Decay removes the endpoint term. Moving the derivative onto the exponential
+costs one minus sign, and differentiating $e^{-\ii\xi t}$ supplies the
+other. The coefficient of $g'$ therefore carries $+\ii\xi$.
 
 For the rectangular image model, let $Q=[0,L_x]\times[0,L_y]$ and write
 $\boldsymbol{x}=(x,y)$. Take $f$ to be a smooth periodic height field with these
@@ -361,12 +415,13 @@ and \eqref{eq:lapmult},
 \end{equation}
 Knowing the coefficients gives the height by synthesis,
 $z(x,y)=\sum_{m,n\in\mathbb Z}\widehat z(k)e^{\ii(k_x x+k_y y)}$.
-At $k=0$ the equation reads $0=0$. Setting $Z(0)=0$ chooses a surface of
-mean height zero. There is a separate issue with the \emph{slopes} at zero
-frequency. Every periodic gradient has zero mean, since integrating either
-partial derivative over its period gives the difference of equal endpoint
-values. A uniform tilt $F=(1,0)$ therefore projects to zero on the torus.
-On an ordinary rectangle its exact height is $z=x+C$.
+At $k=0$ the equation reads $0=0$. Setting $Z(0)=0$ fixes the mean
+height. A tilted board illustrates a different effect of the same frequency.
+On a rectangle $F=(1,0)$ integrates to $z=x+C$. Glue the two vertical
+edges together and a walk across the board returns to its starting point
+one board-width higher. A periodic height cannot do that. Each partial
+derivative of a periodic height averages to zero, so this uniform tilt
+projects to zero even though its curl vanishes everywhere.
 
 We can also derive \eqref{eq:fc} directly from the two slope measurements.
 Orthogonality of the Fourier modes (Parseval's identity) rewrites
@@ -389,7 +444,7 @@ $c=-\ii k_xP-\ii k_yU$, including the minus sign in \eqref{eq:fc}.
 For real data the solutions at $k$ and $-k$ are conjugates, so their inverse
 Fourier series gives a real height.
 
-What happened to the slopes? Multiplying $Z$ by $a$ gives their fitted values,
+Multiplying the fitted $Z$ by $a$ returns the two slope coefficients,
 \begin{equation}
  \widehat{\nabla z}(k)
  =\frac{1}{k_x^2+k_y^2}
@@ -403,7 +458,7 @@ of $b$ and removes the perpendicular one. This orthogonal projection onto
 integrable slopes is the construction of Frankot and Chellappa \cite{FC}.
 
 \newpage
-\section{Two waves and a height I can check by hand}
+\section{Two waves on a square}
 
 On the square $[0,2\pi]^2$ with opposite edges identified, suppose the measured
 slopes are
@@ -411,11 +466,13 @@ slopes are
  F=(p,q)=(3,1)\cos s+(-1,3)\cos t,\qquad s=x+y,\quad t=2x-y .
  \label{eq:two-waves}
 \end{equation}
-Can I integrate the first wave alone? For a height $b\sin s$, the two slopes
-would both be $b\cos s$. The observations ask for $b=3$ and $b=1$ at the
-same time. Their squared disagreement is
+The crests of the first wave run along $x+y=\mathrm{constant}$. Moving
+one step right advances its phase just as much as moving one step up.
+A height $b\sin s$ must therefore have two equal slope amplitudes.
+The data ask for $3$ in one direction and $1$ in the other. Their squared disagreement is
 $(b-3)^2+(b-1)^2=2(b-2)^2+2$. The closest choice is $b=2$.
-The picture shows the calculation in the plane of slope amplitudes.
+In the slope plane the calculation is a perpendicular dropped from
+$(3,1)$ to the diagonal.
 
 \begin{center}
 \begin{tikzpicture}[>=stealth,scale=0.84]
@@ -451,13 +508,13 @@ Differentiating the data and the height gives a second check on the signs,
  \partial_x p+\partial_y q=-4\sin s+5\sin t=\Delta z_* .
 \end{equation}
 Both squared cosines average to $1/2$. The mean squared residual is therefore
-$(2+5)/2=7/2$. One feature of the result is easy to miss. If an instrument
-also adds $\varepsilon(1,1)\cos s$, the extra term is already the gradient
-of $\varepsilon\sin s$. The reconstructed height changes by exactly that
-amount. Integrability alone cannot distinguish this error from a real ripple.
+$(2+5)/2=7/2$. Now imagine a small instrumental error that moves the first
+point \emph{along} the diagonal. Adding $\varepsilon(1,1)\cos s$ amounts
+to adding the gradient of $\varepsilon\sin s$. That whole ripple survives
+in the recovered height. Every walk across it agrees with every other.
 
 \newpage
-\section{What changes on a pixel grid?}
+\section{A derivative between pixels}
 
 Take $N_x$ by $N_y$ pixels with spacings $h_x,h_y$ and periodic indices
 $j,\ell$ starting at zero. At frequency indices $m,n$, write
@@ -502,95 +559,60 @@ at every frequency with a positive denominator, then inverse transform the
 height coefficients. Set jointly invisible coefficients to zero before the
 inverse transform to select the minimum-norm height.
 
-The constant mode is always invisible. On an even $x$ grid the alternating
-sequence $(-1)^j$ is invisible to $D_x$ as well, since its two neighbours
-are equal. When both grid sizes are even, the zero denominator occurs at all
+There is a curious blind spot in this derivative. Paint the columns of
+an even grid alternately black and white. At every black column the two
+neighbours are both white, and at every white column they are both black.
+The centered difference sees zero everywhere. This stripe pattern is the
+mode $(-1)^j$. When both grid sizes are even, the zero denominator occurs at all
 four phase pairs in $\{0,\pi\}^2$. A single vanishing multiplier still
 leaves a usable estimate whenever the other one is nonzero.
 
 \newpage
-\section{Back to the four lights}
+\section{Two walks across the cheek}
 \begin{center}
 \includegraphics[width=.96\linewidth]{monkey_surface.png}
 
-\small Figure 3. The mean-zero FC height field from the four lighting
-channels, viewed from the front and at an angle. The axes use pixel units.
+\small Figure 4. The reconstructed head in a front and an oblique view.
+Height is relative to the mean of the full image and is measured in pixel units.
 \end{center}
 
-To reproduce this surface, take the common $219\times389$ image rectangle
-from the four exports. Within rows $[45,174)$ and columns $[98,261)$,
-threshold the brightest of the four images at 18 grey levels. Keep the
-largest four-connected component and fill its holes. This estimates a
-silhouette of 8,168 pixels. I retain slopes where $\widehat n_z\ge0.2$ and
-at least three of the four intensities are at least 8. This leaves 6,285
-pixels. The thresholds are choices for this demonstration. Each retained
-normal uses all four observations with equal weights.
+The silhouette contains 8,168 pixels. I kept the 6,285 for which
+$\widehat n_z\ge0.2$ and at least three lamps gave a grey level of 8 or
+more. Elsewhere I set the slope to zero before fitting a periodic height
+on the full $219\times389$ rectangle. The dark gaps between ears and face
+matter here. Filling them differently would change the heights on either
+side. The original experimenters used fast marching \cite{setup}. For the
+surface in Figure 4 I used the centered differences of
+\eqref{eq:discrete-recovery}. Its squared slope error over the rectangle
+is $0.3491$ times that of a flat surface.
 
-I assign zero slopes everywhere else, including excluded pixels inside the
-silhouette. I then apply the centered-difference formula
-\eqref{eq:discrete-recovery} to the whole rectangle, with periodic edges,
-unit spacing and zero mean height. Thus the boundary and missing pixels
-affect the fitted surface. The silhouette is used again to display the
-result. The two ears separate in the height map, but their height relative
-to the face depends on how the intervening slopes were filled. No back
-surface or physical depth scale is recovered.
+Start at the gold ring, row 95, column 160. Walk 20 pixels right and 10
+up. Then try going up first. Both routes stay on the measured part of the
+cheek. I summed in steps of two pixels because a centered difference at
+$j$ measures the height change from $j-1$ to $j+1$ divided by two.
+\begin{center}
+\begin{tabular}{lrr}
+ & Measured slopes & Slopes of the fitted height\\
+\hline
+Right, then up & $2.665$ & $2.588$\\
+Up, then right & $2.180$ & $2.588$
+\end{tabular}
+\end{center}
+Before projection I could gain almost half a pixel of height by walking a
+loop on the cheek. After projection each two-pixel step is a difference of
+heights. The intermediate heights cancel in the sum, leaving the same
+$z_{85,180}-z_{95,160}$ in row--column notation, whichever way I went.
 
-One check is to differentiate the height again with the same centered
-differences. Relative to a flat surface, the ratio of squared slope errors is
-\begin{equation}
- \frac{\sum[(D_x z-p)^2+(D_{\rm row}z-q_{\rm row})^2]}
-      {\sum[p^2+q_{\rm row}^2]}=0.3491
-\end{equation}
-over the full rectangle. This measures the slope fit. The experimenters used
-fast marching to integrate their normals \cite{setup}. The height in Figure 3
-comes from our own brightness fit and Fourier integration.
-
-My earlier question was whether two paths give the same height difference.
-At the cheek pixel the camera supplied four brightnesses, and a fit supplied
-two slopes. It took a second fit, across pixels, to give those slopes a
-single surface to live on.
-
-\newpage
-\section*{Repeating the calculation}
-
-The \href{https://github.com/Gatsby0916/math-thoughts/blob/main/latex/photometric_stereo/reconstruct.py}{companion Python script}
-reads the four LED images directly from the
-\href{https://pure.strath.ac.uk/ws/portalfiles/portal/99603607/Out_of_plane_configuration_monkey_head.zip}{monkey-head archive}
-and verifies its SHA-256 digest. With NumPy, SciPy, Pillow and Matplotlib
-installed, run the following in the directory containing the script, with
-the archive alongside it or with its full path as the argument.
-\begin{verbatim}
-python reconstruct.py Out_of_plane_configuration_monkey_head.zip
-\end{verbatim}
-The script prints the example pixel, the number of usable slopes and the
-squared-error ratio. It writes the three figures to the repository's
-image directory. The essential arrays can also be traced by their shapes.
-\begin{enumerate}
-\item \textbf{Four observations per point.} For each released display export
-take rows $[93,312)$ and columns $[65,454)$, excluding margins and colour
-bars. The result has 219 rows and 389 columns. Stacking the four pictures
-in LED order gives an array of shape $(219,389,4)$. All four use the
-same mapping of the authors' displayed range $[0,200]$ to 8-bit grey.
-\item \textbf{Three fitted components per point.} The $4\times3$ lighting
-matrix has a $3\times4$ pseudoinverse. Multiplying each column of four
-intensities by it yields three components of $\widehat{\mathbf g}$.
-Their length gives the amplitude map. Their direction gives the normal map.
-\item \textbf{Two slopes to one height.} Form the two $219\times389$ slope
-images and apply a 2D FFT to each. At each frequency, equation
-\eqref{eq:discrete-recovery} combines their coefficients into one height
-coefficient. An inverse 2D FFT gives the $219\times389$ height image.
-Both dimensions here are odd, so the constant is the only jointly invisible mode.
-\end{enumerate}
-To recompile the note in the repository, work in
-\path{latex/photometric_stereo} and run
-\texttt{latexmk -pdf frankot\_chellappa.tex}.
-
+\begingroup
+\small
 \begin{thebibliography}{5}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
 \bibitem{data} E. Le Francois, M. Dawson, M. Strain and J. Herrnsdorf.
 \href{https://doi.org/10.15129/44b337ab-9fd9-4983-9079-a0dcfaae1d84}{Data for
 Synchronization-Free Top-down Illumination Photometric Stereo Imaging Using Light-Emitting Diodes and a Mobile Device}.
-University of Strathclyde (2020), out-of-plane monkey-head capture.
-Figures 1--3 are crops and computations using these data under
+University of Strathclyde (2020), out-of-plane monkey-head and cube-corner captures.
+Figures 1--5 are crops and computations using these data under
 \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.
 \bibitem{setup} E. Le Francois et al.
 \href{https://doi.org/10.1364/OE.408658}{Synchronization-free top-down illumination photometric stereo imaging using light-emitting diodes and a mobile device}.
@@ -605,4 +627,14 @@ Figures 1--3 are crops and computations using these data under
   \emph{IEEE Transactions on Pattern Analysis and Machine Intelligence}
   \textbf{10} (1988), 439--451.
 \end{thebibliography}
+\endgroup
+\clearpage
+\section*{A cube under the same four lights}
+\begin{center}
+\includegraphics[width=\linewidth,height=.78\textheight,keepaspectratio]{second_example.png}
+
+\small Figure 5. The marked patch straddles the ridge. I omitted the
+darkest reading at each pixel and reflected the slopes at the patch edges
+before integration. Cube-corner capture, Le Francois et al.~\cite{data}.
+\end{center}
 \end{document}

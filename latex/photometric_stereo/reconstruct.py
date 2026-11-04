@@ -19,6 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import Normalize
+from matplotlib.patches import Rectangle
 from PIL import Image
 from scipy import ndimage
 
@@ -82,6 +83,46 @@ def integrate(p, q_row):
     coeff = np.divide(numerator, denominator, out=np.zeros_like(numerator),
                       where=denominator > 0)
     return np.fft.ifft2(coeff).real
+
+
+def draw_normal_arrows(out, intensity, normal, silhouette, retained):
+    """Show the same sampled in-plane normals on the full crop and a detail."""
+    row, col = EXAMPLE_PIXEL
+    step = 6
+    rr, cc = np.indices(retained.shape)
+    sampled = retained & ((rr - row) % step == 0) & ((cc - col) % step == 0)
+    rows, cols = np.nonzero(sampled)
+    nx, ny = normal[rows, cols, 0], normal[rows, cols, 1]
+    # A single photographic underlay, brightened only for contrast with the arrows.
+    grey = np.where(silhouette, 0.32 + 0.68 * np.minimum(intensity[..., 1] / 155, 1), 1)
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 2.95),
+                             gridspec_kw={"width_ratios": [1.35, 1]},
+                             layout="constrained")
+    left, right = axes
+    detail = (col - 19.5, col + 22.5, row - 19.5, row + 15.5)
+    for ax in axes:
+        ax.imshow(grey, cmap="gray", vmin=0, vmax=1, interpolation="nearest")
+        # On these image axes the row coordinate increases downwards.
+        vectors = ax.quiver(cols, rows, nx, -ny, angles="xy", scale_units="xy",
+                            scale=1/8, units="xy", width=0.43, headwidth=3.8,
+                            headlength=4.4, headaxislength=3.8, minlength=0,
+                            color="#00546a", pivot="tail")
+        ax.plot(col, row, "o", ms=3.5, mec="none", mfc="#c64c0a")
+        ax.set(xticks=[], yticks=[], frame_on=False, aspect="equal")
+    left.set(xlim=(VIEW[1].start, VIEW[1].stop-1), ylim=(VIEW[0].stop-1, VIEW[0].start),
+             title="Projected normals")
+    x0, x1, y0, y1 = detail
+    left.add_patch(Rectangle((x0, y0), x1-x0, y1-y0, fill=False,
+                             edgecolor="#c64c0a", lw=0.9))
+    right.set(xlim=(x0, x1), ylim=(y1, y0), title="Detail around the marked pixel")
+    right.add_patch(Rectangle((0.56, 0.02), 0.43, 0.11, transform=right.transAxes,
+                              color="white", alpha=0.93, linewidth=0, zorder=4))
+    right.quiverkey(vectors, 0.60, 0.075, 0.5, r"length $0.5$", labelpos="E",
+                    labelsep=0.06, coordinates="axes", zorder=5,
+                    fontproperties={"size": 9})
+    fig.savefig(out / "monkey_normal_arrows.png", dpi=270,
+                bbox_inches="tight", pad_inches=0.05)
+    plt.close(fig)
 
 
 def save_figures(out, intensity, rho, normal, silhouette, retained, p, q_row, height):
@@ -162,6 +203,7 @@ def save_figures(out, intensity, rho, normal, silhouette, retained, p, q_row, he
                  label="Relative height (pixel units)")
     fig.savefig(out / "monkey_surface.png", dpi=240, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
+    draw_normal_arrows(out, intensity, normal, silhouette, retained)
 
 
 def main():
@@ -186,6 +228,15 @@ def main():
     dr = (np.roll(height, -1, axis=0) - np.roll(height, 1, axis=0)) / 2
     print("Squared slope residual relative to zero height (full domain)",
           ((dx-p)**2 + (dr-q_row)**2).sum() / (p**2 + q_row**2).sum())
+    # A centered difference spans the two pixels on either side of its sample.
+    start_row, start_col = EXAMPLE_PIXEL
+    end_row, end_col = 85, 180
+    horizontal = slice(start_col + 1, end_col, 2)
+    vertical = slice(end_row + 1, start_row, 2)
+    for label, across, down in [("Measured", p, q_row), ("Fitted", dx, dr)]:
+        right_up = across[start_row, horizontal].sum() - down[vertical, end_col].sum()
+        up_right = across[end_row, horizontal].sum() - down[vertical, start_col].sum()
+        print(label, "height gain (right then up, up then right)", 2 * right_up, 2 * up_right)
 
 
 if __name__ == "__main__":
